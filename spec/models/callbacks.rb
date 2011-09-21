@@ -41,6 +41,7 @@ class Address
   end
 end
 
+
 class Instrument
   include Mongoid::Document
   field :name
@@ -61,6 +62,9 @@ class Instrument
   end
 end
 
+
+
+
 class Song
   include Mongoid::Document
   field :title
@@ -77,6 +81,8 @@ class Label
   include Mongoid::Document
   field :name
   embedded_in :artist
+  embeds_many :baby_labels, :cascade_callbacks => true
+
   before_validation :cleanup
 
   after_save :after_save_stub
@@ -86,6 +92,18 @@ class Label
     self.name = self.name.downcase.capitalize
   end
 
+  def after_save_stub
+  end
+end
+
+class BabyLabel
+  include Mongoid::Document
+  field :name
+  embedded_in :label
+
+  after_save :after_save_stub
+
+  private
   def after_save_stub
   end
 end

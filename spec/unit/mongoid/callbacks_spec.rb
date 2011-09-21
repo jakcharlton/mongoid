@@ -95,6 +95,7 @@ describe Mongoid::Callbacks do
       before do
         artist.save!
         artist.build_instrument(:name => "Piano")
+
       end
 
       context "child is new" do
@@ -144,11 +145,16 @@ describe Mongoid::Callbacks do
         Label.new(:name => "Tower Records")
       end
 
+      let(:baby_label) do
+        BabyLabel.new(:name => "Tower Records Subsidiary")
+      end
+
       let(:instrument) do
         Instrument.new(:name => "Harpsichord")
       end
 
       before do
+        label.baby_labels << baby_label
         artist.labels << label
         artist.instrument = instrument
       end
@@ -157,6 +163,15 @@ describe Mongoid::Callbacks do
 
         it "should cascade callbacks" do
           label.expects(:after_save_stub)
+          baby_label.expects(:after_save_stub)
+          artist.save!
+        end
+
+        it "should cascade callbacks when child has been triggered but parent has not been changed" do
+          artist.save!
+          baby_label2 = BabyLabel.new(:name => "Another Tower Records Subsidiary")
+          artist.labels.first.baby_labels << baby_label2
+          baby_label2.expects(:after_save_stub)
           artist.save!
         end
       end
